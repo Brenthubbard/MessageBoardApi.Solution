@@ -1,0 +1,14 @@
+Message
+-MessageId
+-User (person posting) Application user? worry about later?
+-Time (DateTime)
+-Content 
+
+Group
+-GroupId
+-Name
+
+GroupMessage
+-GroupMessageId
+-GroupId
+-MessageId
