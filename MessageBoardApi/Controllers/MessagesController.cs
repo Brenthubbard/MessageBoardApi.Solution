@@ -30,7 +30,7 @@ namespace MessageBoardApi.Controllers
         query = query.Where(entry => entry.TimeStamp == DateTime);
       }
       
-      return await _db.Messages.ToListAsync();
+      return await query.ToListAsync();
     }
     //Post api/messages
     [HttpPost]
