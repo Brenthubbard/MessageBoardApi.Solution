@@ -99,5 +99,36 @@ namespace MessageBoardApi.Controllers
 
       return NoContent();
     }
+
+    // POST api/Groups/AddMessage/{id}
+    [HttpPost("AddMessage/{id}")]
+    public async Task<IActionResult> AddMessage(int id, Message message)
+    {
+      Group selectedGroup = await _db.Groups.FindAsync(id);
+      Message selectedMessage = await _db.Messages.FindAsync(message.MessageId);
+      if (selectedGroup == null || selectedMessage == null)
+      {
+        return BadRequest();
+      }
+
+      _db.GroupMessage.Add(new GroupMessage() 
+      { 
+        GroupId = selectedGroup.GroupId, 
+        MessageId = selectedMessage.MessageId,
+        Group = selectedGroup,
+        Message = selectedMessage
+      });
+      await _db.SaveChangesAsync();
+      return NoContent();
+    }
+
+    // GET api/Groups/GetMessages/{id}
+    [HttpGet("GetMessages/{id}")]
+    public async Task<ActionResult<IEnumerable<GroupMessage>>> GetMessages(int id)
+    {
+      List<GroupMessage> joinEntries = await _db.GroupMessage.Where(entry => entry.GroupId == id).ToListAsync();
+      return joinEntries;
+    }
+
   }
 }

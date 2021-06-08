@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using MessageBoardApi.Models;
 using System.Linq;
 using System.Text.Json;
+using System;
 
 namespace MessageBoardApi.Controllers
 {
@@ -19,9 +20,16 @@ namespace MessageBoardApi.Controllers
       _db = db;
     }
     //Get api/messages
+    //Get: api/Messages/DateTime
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Message>>> Get()
+    public async Task<ActionResult<IEnumerable<Message>>> Get(DateTime DateTime)
     {
+        var query = _db.Messages.AsQueryable();
+        if (DateTime != null)
+        {
+        query = query.Where(entry => entry.TimeStamp == DateTime);
+      }
+      
       return await _db.Messages.ToListAsync();
     }
     //Post api/messages
@@ -33,6 +41,11 @@ namespace MessageBoardApi.Controllers
 
       return CreatedAtAction(nameof(GetMessage), new { id = message.MessageId }, message);
     }
+
+    
+
+
+
     //Get: api/Messages/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Message>> GetMessage(int id)
@@ -110,7 +123,13 @@ namespace MessageBoardApi.Controllers
         return BadRequest();
       }
 
-      _db.GroupMessage.Add(new GroupMessage() { GroupId = selectedGroup.GroupId, MessageId = selectedMessage.MessageId });
+      _db.GroupMessage.Add(new GroupMessage() 
+      { 
+        GroupId = selectedGroup.GroupId, 
+        MessageId = selectedMessage.MessageId,
+        Group = selectedGroup,
+        Message = selectedMessage
+      });
       await _db.SaveChangesAsync();
       return NoContent();
     }
