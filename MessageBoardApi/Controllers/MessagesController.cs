@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessageBoardApi.Models;
 using System.Linq;
+using System.Text.Json;
 
 namespace MessageBoardApi.Controllers
 {
@@ -50,17 +51,8 @@ namespace MessageBoardApi.Controllers
     {
       //get a list of entries in GroupMessage table that match message id
       List<GroupMessage> joinEntries = await _db.GroupMessage.Where(entry => entry.MessageId == id).ToListAsync();
-      //get a list of groups in Group table that match associated group ids from GroupMessage list
-      // List<Group> allGroupsForMessage = new List<Group>();
-      // foreach(GroupMessage entry in joinEntries)
-      // {
-      //   Group entryGroup = await _db.Groups.FirstOrDefaultAsync(entry => entry.GroupId == entry.GroupId);
-      //   allGroupsForMessage.Add(entryGroup);
-      // }
-      // return allGroupsForMessage;
       return joinEntries;
     }
-
 
     // Put: api/Message/5
     [HttpPut("{id}")]
