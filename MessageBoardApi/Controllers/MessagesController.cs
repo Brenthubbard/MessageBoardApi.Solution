@@ -19,17 +19,18 @@ namespace MessageBoardApi.Controllers
     {
       _db = db;
     }
+
     //Get api/messages
     //Get: api/Messages/DateTime
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Message>>> Get(DateTime DateTime)
     {
-        var query = _db.Messages.AsQueryable();
-        if (DateTime != null)
-        {
+      var query = _db.Messages.AsQueryable();
+      if (DateTime != null)
+      {
         query = query.Where(entry => entry.TimeStamp == DateTime);
       }
-      
+
       return await query.ToListAsync();
     }
     //Post api/messages
@@ -41,10 +42,6 @@ namespace MessageBoardApi.Controllers
 
       return CreatedAtAction(nameof(GetMessage), new { id = message.MessageId }, message);
     }
-
-    
-
-
 
     //Get: api/Messages/5
     [HttpGet("{id}")]
@@ -58,6 +55,7 @@ namespace MessageBoardApi.Controllers
       }
       return message;
     }
+
     //Get all groups for a specific message
     [HttpGet("GetGroup/{id}")]
     public async Task<ActionResult<IEnumerable<GroupMessage>>> GetAllGroup(int id)
@@ -69,11 +67,15 @@ namespace MessageBoardApi.Controllers
 
     // Put: api/Message/5
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, Message message)
+    public async Task<IActionResult> Put(int id, Message message, string username)
     {
       if (id != message.MessageId)
       {
         return BadRequest();
+      }
+      if (username != message.User)
+      {
+        return Unauthorized();
       }
       _db.Entry(message).State = EntityState.Modified;
       try
@@ -97,14 +99,19 @@ namespace MessageBoardApi.Controllers
     {
       return _db.Messages.Any(e => e.MessageId == id);
     }
+
     //Delete: api/Messages
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMessage(int id)
+    public async Task<IActionResult> DeleteMessage(int id, string username)
     {
       var message = await _db.Messages.FindAsync(id);
       if (message == null)
       {
         return NotFound();
+      }
+      if (message.User != username)
+      {
+        return Unauthorized();
       }
       _db.Messages.Remove(message);
       await _db.SaveChangesAsync();
@@ -123,9 +130,9 @@ namespace MessageBoardApi.Controllers
         return BadRequest();
       }
 
-      _db.GroupMessage.Add(new GroupMessage() 
-      { 
-        GroupId = selectedGroup.GroupId, 
+      _db.GroupMessage.Add(new GroupMessage()
+      {
+        GroupId = selectedGroup.GroupId,
         MessageId = selectedMessage.MessageId,
         Group = selectedGroup,
         Message = selectedMessage
